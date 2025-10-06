@@ -11,6 +11,11 @@ class DataManager:
         return new_user
 
 
+    def get_user_by_id(self, user_id):
+        """Retrieves the user's name"""
+        return User.query.get(user_id)
+
+
     def get_users(self):
         """Returns a list of all User objects."""
         users =  User.query.all()

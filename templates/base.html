@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+</head>
+<body>
+    <header class="app-header">
+      <div class="container">
+        <span class="app-title">MovieApp</span>
+      </div>
+    </header>
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+    </main>`
+        <footer class="app-footer">
+        <div class="container">
+            <p>&copy; 2025 WebApp</p>
+        </div>
+    </footer>
+</body>
+</html>

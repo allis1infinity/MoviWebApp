@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <a href="{{ url_for('index')}}" class="link">Back to Users</a>
+
+    <h1>Movies for {{ user.name}} </h1>
+
+    <!-- 1. ADD MOVIE FORM -->
+    <form action="{{ url_for('add_favourite_movie', user_id=user.id) }}"
+          method="post" class="add_movie_form">
+        <label for="movie_title">Movie Title</label>
+        <input type="text"
+               id="movie_title"
+               name="movie_title"
+               placeholder="Enter the movie title..."
+               required>
+        <button type="submit" class="btn add-btn">Add Movie</button>
+    </form>
+
+ <!-- 2. MOVIE LIST (CARDS) -->
+    <div class="movies-container">
+        {% for movie in movies %}
+        <div class="movie-card">
+            <!-- Poster -->
+            <img class="m-poster-url"
+                  src="{{ movie.poster_url }}"
+                  alt="Poster for {{ movie.name }}"/>
+
+            <div class="movie-card-actions">
+                <!-- 1.1. UPDATE FORM -->
+                <form action="{{ url_for('update_movie', user_id=user.id, movie_id=movie.id) }}"
+                      method="POST"
+                      class="update-form">
+
+                    <input type="text"
+                           name="new_title"
+                           value="{{ movie.name }}"
+                           required>
+
+                    <button type="submit" class="btn btn-update">Update</button>
+                </form>
+
+                <div class="movie-card-details">
+                    <p class="m-year">Year: {{ movie.year }}</p>
+                    <p class="m-director">Director: {{ movie.director }}</p>
+                </div>
+
+                <!-- 1.2. DELETE FORM -->
+                <form method="POST"
+                      action="{{ url_for('delete_movie', user_id=user.id, movie_id=movie.id) }}">
+                    <button type="submit" class="btn btn-delete">Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
