@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from models import db, Movie
 import requests
 import os
+from werkzeug.exceptions import HTTPException
 
 load_dotenv()
 app = Flask(__name__)
@@ -29,16 +30,25 @@ def index():
 @app.route('/users', methods=['POST'])
 def create_user():
     """Create a new user and add in the database"""
+    user = request.form.get('username').strip()
 
-    user = request.form.get('username')
-    if user:
-        data_manager.create_user(name=user)
+    if not user:
+        flash("Please enter a username.")
+        return redirect(url_for('index'))
+
+    data_manager.create_user(name=user)
+    flash("User created successfully.")
     return redirect(url_for('index'))
 
 @app.route('/users/<int:user_id>/movies', methods=['GET'])
 def user_movies(user_id):
     """Retrieves the user’s list of favorite movies and displays it."""
     user = data_manager.get_user_by_id(user_id)
+
+    if user is None:
+        flash(f"User with ID {user_id} not found")
+        return redirect(url_for('index'))
+
     movies = data_manager.get_movies(user_id)
     return render_template('movies.html', movies=movies, user=user)
 
@@ -76,23 +86,49 @@ def add_favourite_movie(user_id):
 def update_movie(user_id, movie_id):
     """ Modify the title of a specific movie in a user’s list"""
     new_title = request.form.get('new_title')
-    if new_title:
-        data_manager.update_movie(movie_id, new_title)
-        flash(f"Movie '{new_title}' successfully updated", 'success')
+    if not new_title or len(new_title) == 0:
+        flash("Please enter a movie title")
+
+    updated_movie = data_manager.update_movie(movie_id, new_title)
+
+    if updated_movie is None:
+        flash(f"Movie '{new_title}' not found!")
+        return redirect(url_for('user_movies', user_id=user_id))
+
+    flash(f"Movie '{new_title}' successfully updated", 'success')
     return redirect(url_for('user_movies', user_id=user_id))
 
 @app.route('/users/<int:user_id>/movies/<int:movie_id>/delete', methods=['POST'])
 def delete_movie(user_id, movie_id):
     """Remove a specific movie from a user’s favorite movie list."""
-    data_manager.delete_movie(movie_id)
+    deleted_movie = data_manager.delete_movie(movie_id)
+
+    if deleted_movie is None:
+        flash(f"Movie '{movie_id}' not found")
+        return redirect(url_for('user_movies', user_id=user_id))
+
     flash(f"Movie  successfully deleted", 'success')
     return redirect(url_for('user_movies', user_id=user_id))
 
 
+
+
+@app.errorhandler(Exception)
+def handle_error(e):
+    """Handles all exceptions and renders a generic error page."""
+    if isinstance(e, HTTPException):
+        error_code = e.code
+    else:
+        error_code = 500
+    return render_template('error.html', error_code=error_code), error_code
+
+
+
+
 if __name__ == '__main__':
-    # with app.app_context():
-    #     db.create_all()
-    #     print(f"Database created successfully at: {file_path}")
-    app.run(host='0.0.0.0',port=5003, debug=True)
+    with app.app_context():
+         db.create_all()
+         print(f"Database created successfully at: {file_path}")
+    app.run(host='0.0.0.0',port=5000, debug=True)
 
 
