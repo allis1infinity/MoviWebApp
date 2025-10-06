@@ -10,7 +10,10 @@ load_dotenv()
 app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-file_path = os.path.join(basedir, 'data/movies.db')
+data_dir = os.path.join(basedir, 'data')
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+file_path = os.path.join(data_dir, 'movies.db')
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{file_path}"
